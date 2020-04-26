@@ -35,6 +35,11 @@ class RpcProvider implements ProviderInterface
     private $agent;
 
     /**
+     * @var
+     */
+    private $serviceName;
+
+    /**
      * @param Client $client
      *
      * @return array
@@ -50,12 +55,16 @@ class RpcProvider implements ProviderInterface
     public function getList(Client $client): array
     {
         // Get health service from consul
-        $services = $this->agent->services();
+        $services = $this->agent->services()->getResult();
 
-        $services = [
+        $lists = [];
 
-        ];
+        array_filter($services,function ($item) use(&$lists){
+            if($item['Service'] == $this->serviceName){
+                $lists[] = $item['Address'].':'.$item['Port'];
+            }
+        });
 
-        return $services;
+        return $lists;
     }
 }

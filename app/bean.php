@@ -8,6 +8,7 @@
  * @license  https://github.com/swoft-cloud/swoft/blob/master/LICENSE
  */
 
+use App\Common\RpcProvider;
 use Swoft\Db\Database;
 use Swoft\Db\Pool;
 use Swoft\Http\Server\HttpServer;
@@ -112,8 +113,14 @@ return [
             'prefix' => 'swoft:'
         ]
     ],
+    'user.provider' => [
+        'class' => RpcProvider::class,
+        'serviceName' => 'user',
+        'agent' => bean(\Swoft\Consul\Agent::class)
+    ],
     'user'               => [
         'class'   => ServiceClient::class,
+        'provider' => bean('user.provider'),
         'host'    => '127.0.0.1',
         'port'    => 18307,
         'setting' => [

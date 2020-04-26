@@ -39,8 +39,18 @@ class RegisterServiceListener implements EventHandlerInterface
      */
     public function handle(EventInterface $event): void
     {
+
         /** @var HttpServer $httpServer */
         $httpServer = $event->getTarget();
+
+        // 判断有没有rpc端口的监听
+        $rpcListener = $httpServer->getListener();
+
+        if(!isset($rpcListener['rpc']) || empty($rpcListener['rpc'])){
+            return;
+        }
+
+        $port = $rpcListener['rpc']->getPort();
 
         $service = [
             'ID'                => 'swoft',
@@ -49,7 +59,12 @@ class RegisterServiceListener implements EventHandlerInterface
                 'http'
             ],
             'Address'           => '127.0.0.1',
-            'Port'              => $httpServer->getPort(),
+            'Port'              => $port,
+            'Check'             => [
+                'tcp'      => '127.0.0.1:'.$port,
+                'interval' => '10s',
+                'timeout'  => '2s',
+            ],
             'Meta'              => [
                 'version' => '1.0'
             ],
@@ -60,9 +75,9 @@ class RegisterServiceListener implements EventHandlerInterface
             ]
         ];
 
-
         // Register
-        //        $this->agent->registerService($service);
-        //        CLog::info('Swoft http register service success by consul!');
+        $this->agent->registerService($service);
+        CLog::info('Swoft http register service success by consul!');
+
     }
 }
